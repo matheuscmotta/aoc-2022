@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 
 public class d9p2 {
     public static void main(String[] args) {
@@ -23,17 +22,12 @@ public class d9p2 {
             System.out.println(e.toString());
         }
 
-        IterableKnot head = new IterableKnot(0, 0, 10 - 1);
+        IterableKnot head = new IterableKnot(0, 0, 9);
         for (String line : lines) {
             head.moveTo(line);
 
-            // Uncomment the section bellow to inspect the sample data.
-            // Grid grid = new Grid(6, 5);
-            // for (Knot knot : head) {
-            // int[] coordinates = knot.getPoint();
-            // grid.add(coordinates[0], coordinates[1], 'x');
-            // }
-            // System.out.println(grid);
+            // Comment/Uncomment to inspect the problem sample data.
+            // Grid.printState(head, line, 18, 18);
         }
         for (Knot knot : head) {
             System.out.println(" Knot number: " + knot.size() + ", Count: " + knot.count());
@@ -47,9 +41,7 @@ class Knot {
     private int size;
     private Knot knotBehind = null;
     private LinkedHashSet<String> history;
-    private int[] lastDirection;
     private final static int[] HORIZONTAL = { 1, 0 };
-    private final static int[] DIAGONAL = { 1, 1 };
     private static HashMap<String, Integer> directionMap = new HashMap<>(4);
 
     {
@@ -59,14 +51,13 @@ class Knot {
         directionMap.put("U", 3);
     }
 
-    public Knot(int x, int y, int size) {
+    public Knot(int x, int y, int numOfKnotsBehind) {
         this.x = x;
         this.y = y;
-        this.size = size + 1;
-        if (size > 0) {
-            knotBehind = new Knot(0, 0, size - 1);
+        this.size = numOfKnotsBehind + 1;
+        if (numOfKnotsBehind > 0) {
+            knotBehind = new Knot(0, 0, numOfKnotsBehind - 1);
         }
-        lastDirection = new int[2];
         history = new LinkedHashSet<>();
         history.add(this.toString());
     }
@@ -75,12 +66,8 @@ class Knot {
         return knotBehind;
     }
 
-    public int[] getPoint() {
+    public int[] getCoordinates() {
         return new int[] { x, y };
-    }
-
-    public int[] getLastDirection() {
-        return lastDirection;
     }
 
     public void moveTo(String operation) {
@@ -93,37 +80,33 @@ class Knot {
         for (int i = 0; i < steps; i++) {
             x += direction[0];
             y += direction[1];
-            lastDirection = direction;
             history.add(this.toString());
-            if (knotBehind != null) {
+            if (knotBehind != null && isDisconnected()) {
                 knotBehind.follow(this);
             }
         }
     }
 
-    private void follow(Knot head) {
-        double distance = Vector.getDistance(this.getPoint(), head.getPoint());
-        if (distance > Math.sqrt(2)) {
-            int[] direction = getDirection(head);
-            move(direction, 1);
+    private boolean isDisconnected() {
+        int[] vector = Vector.getVector(this.getCoordinates(), knotBehind.getCoordinates());
+        // Instead of the Pythagorean theorem, it is simpler to just check if the vector
+        // formed by the two knots has either of its coordinates greater than 1.
+        if (Math.abs(vector[0]) > 1 || Math.abs(vector[1]) > 1) {
+            return true;
         }
+        return false;
     }
 
-    private int[] getDirection(Knot head) throws Error {
-        int[] vector = Vector.getVector(this.getPoint(), head.getPoint());
-        if (Vector.isParallelToAxis(vector)) {
-            return head.getLastDirection();
-        }
+    private void follow(Knot head) {
+        int[] direction = getDirection(head);
+        move(direction, 1);
+    }
 
-        for (int i = 0; i < 4; i++) {
-            int[] diagonal = Vector.rotate(DIAGONAL, i);
-            // Find the appropriate diagonal vector for the movement.
-            if (Vector.inSameQuadrant(diagonal, vector)) {
-                return diagonal;
-            }
-        }
-        // This path is impossible (?).
-        throw new Error("Could not find a direction.");
+    private int[] getDirection(Knot head) {
+        // Form a vector representing the segment from `this` to `head`, then
+        // get the closest vector which have either 0 or 1 as its coordinates.
+        int[] vector = Vector.getVector(this.getCoordinates(), head.getCoordinates());
+        return Vector.closestWithCoordinates1Or0(vector);
     }
 
     public int count() {
@@ -141,8 +124,8 @@ class Knot {
 }
 
 class IterableKnot extends Knot implements Iterable<Knot> {
-    public IterableKnot(int x, int y, int size) {
-        super(x, y, size);
+    public IterableKnot(int x, int y, int numOfKnotsBehind) {
+        super(x, y, numOfKnotsBehind);
     }
 
     @Override
@@ -164,34 +147,33 @@ class IterableKnot extends Knot implements Iterable<Knot> {
             currentKnot = currentKnot.getKnotBehind();
             return knot;
         }
-
-        @Override
-        public void remove() {
-            throw new Error("Something wrong with the iterator...");
-        }
     }
 }
 
 class Grid {
-    private LinkedList<Character>[][] grid;
+    private char[][] grid;
+    private int xOffset;
+    private int yOffset;
 
-    public Grid(int rowCount, int columnCount) {
-        // This is ok because the add method initializes the correct type during runtime.
-        grid = new LinkedList[rowCount][columnCount];
+    public Grid(int rows, int columns) {
+        this.xOffset = rows;
+        this.yOffset = columns;
+        // A translation of axes is used to support knots with negative coordinates.
+        grid = new char[rows * 2][columns * 2];
 
-        for (int i = 0; i < rowCount; i++) {
-            for (int j = 0; j < columnCount; j++) {
-                grid[i][j] = new LinkedList<Character>();
+        // Fill the grid with dots (using the dot product symbol).
+        for (int i = 0; i < numRows(); i++) {
+            for (int j = 0; j < numColumns(); j++) {
+                grid[i][j] = '⋅';
             }
         }
     }
 
     public void add(int x, int y, char tag) {
-        grid[x][y].add(tag);
-    }
-
-    public Character getFirstAt(int x, int y) {
-        return grid[x][y].getFirst();
+        // Translation of axes.
+        grid[x + xOffset][y + yOffset] = tag;
+        // Keep the center marked.
+        grid[xOffset][yOffset] = 's';
     }
 
     public int numRows() {
@@ -202,23 +184,22 @@ class Grid {
         return grid[0].length;
     }
 
-    public void fill() {
-        for (int i = 0; i < numRows(); i++) {
-            for (int j = 0; j < numColumns(); j++) {
-                if (grid[i][j].isEmpty()) {
-                    add(i,j,'⋅');
-                }
-            }
+    public static void printState(IterableKnot head, String line, int xOffset, int yOffset) {
+        Grid grid = new Grid(xOffset, yOffset);
+        for (Knot knot : head) {
+            int[] coordinates = knot.getCoordinates();
+            grid.add(coordinates[0], coordinates[1], 'x');
         }
+        System.out.println("== " + line + " ==");
+        System.out.println(grid);
     }
 
     @Override
     public String toString() {
-        fill();
         StringBuilder stringBuilder = new StringBuilder();
         for (int j = numColumns() - 1; j >= 0; j--) {
             for (int i = 0; i < numRows(); i++) {
-                stringBuilder.append(getFirstAt(i, j)).append(" ");
+                stringBuilder.append(grid[i][j]);
             }
             stringBuilder.append("\n");
         }
@@ -238,24 +219,14 @@ class Vector {
         return rotated;
     }
 
-    public static boolean isParallelToAxis(int[] vector) {
-        return vector[0] == 0 || vector[1] == 0;
-    }
-
-    public static double getDistance(int[] vector1, int[] vector2) {
-        // Calculate the distance using the Pythagorean theorem.
-        return Math.sqrt(Math.pow(vector2[0] - vector1[0], 2) + Math.pow(vector2[1] - vector1[1], 2));
-    }
-
     public static int[] getVector(int[] point1, int[] point2) {
         return new int[] { point2[0] - point1[0], point2[1] - point1[1] };
     }
 
-    public static boolean inSameQuadrant(int[] vector1, int[] vector2) {
-        // Two vectors are in the same quadrant when their corresponding coordinates
-        // have the same sign.
-        boolean sameX = (vector1[0] > 0 && vector2[0] > 0) || (vector1[0] < 0 && vector2[0] < 0);
-        boolean sameY = (vector1[1] > 0 && vector2[1] > 0) || (vector1[1] < 0 && vector2[1] < 0);
-        return sameX && sameY;
+    public static int[] closestWithCoordinates1Or0(int[] vector) {
+        int[] direction = new int[2];
+        direction[0] = (int) Math.signum(vector[0]);
+        direction[1] = (int) Math.signum(vector[1]);
+        return direction;
     }
 }
