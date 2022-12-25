@@ -4,7 +4,7 @@ import java.io.FileReader;
 import java.util.HashSet;
 import java.io.BufferedReader;
 
-public class d6p1 {
+public class d06p1 {
     public static void main(String[] args) {
         // This is a very simple solution to the puzzle, but far from ideal. A better
         // approach would involve skipping the frame ahead of duplicates instead of

@@ -4,7 +4,7 @@ import java.io.FileReader;
 import java.io.BufferedReader;
 import java.util.ArrayList;
 
-public class d8p1 {
+public class d08p2 {
     public static void main(String[] args) {
         ArrayList<String> lines = new ArrayList<>(99);
         try (BufferedReader textFile = new BufferedReader(new FileReader("aoc/input/d8.txt"))) {
@@ -21,9 +21,10 @@ public class d8p1 {
 
         Grid grid = new Grid(lines.size(), lines.get(0).length());
         grid.setFromArrayList(lines);
-        System.out.println(grid.countVisibleTrees());
+        System.out.println(grid.maxScenicScore());
     }
 }
+
 
 class Grid {
     private Tree[][] grid;
@@ -75,7 +76,22 @@ class Grid {
             return true;
         return false;
     }
+
+    public int maxScenicScore() {
+        int maxScenicScore = 0;
+        for (int i = 0; i < numRows(); i++) {
+            for (int j = 0; j < numColumns(); j++) {
+                Tree tree = this.get(i, j);
+                int currentScore = tree.scenicScore();
+                if (currentScore > maxScenicScore) {
+                    maxScenicScore = currentScore;
+                }
+            }
+        }
+        return maxScenicScore;
+    }
 }
+
 
 class Tree {
     private int x;
@@ -91,7 +107,7 @@ class Tree {
     }
 
     public boolean isVisible() {
-        final int[] direction = { 1, 0 };
+        final int[] direction = {1, 0};
         for (int i = 0; i < 4; i++) {
             int[] currentDirection = rotate(direction, i);
             if (this.height > tallestAhead(currentDirection)) {
@@ -104,7 +120,7 @@ class Tree {
     private int tallestAhead(int[] direction) {
         // Would be a good idea to memoize this method.
         int tallest;
-        int[] nextInDirection = { x + direction[0], y + direction[1] };
+        int[] nextInDirection = {x + direction[0], y + direction[1]};
         if (grid.containsCoordinates(nextInDirection[0], nextInDirection[1])) {
             Tree nextTree = grid.get(nextInDirection[0], nextInDirection[1]);
             tallest = Math.max(nextTree.height, nextTree.tallestAhead(direction));
@@ -123,5 +139,30 @@ class Tree {
             rotated[1] = -x;
         }
         return rotated;
+    }
+
+    public int scenicScore() {
+        final int[] direction = {1, 0};
+        int scenicScore = 1;
+        for (int i = 0; i < 4; i++) {
+            int[] currentDirection = rotate(direction, i);
+            scenicScore *= viewingDistance(currentDirection);
+        }
+        return scenicScore;
+    }
+
+    private int viewingDistance(int[] direction) {
+        int distance = 0;
+        int[] next = {x + direction[0], y + direction[1]};
+        while (grid.containsCoordinates(next[0], next[1])) {
+            if (grid.get(next[0], next[1]).height >= height) {
+                distance += 1;
+                break;
+            }
+            distance += 1;
+            next[0] += direction[0];
+            next[1] += direction[1];
+        }
+        return distance;
     }
 }

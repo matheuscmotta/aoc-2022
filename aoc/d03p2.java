@@ -3,7 +3,7 @@ package aoc;
 import java.io.FileReader;
 import java.io.BufferedReader;
 
-public class d3p2 {
+public class d03p2 {
     public static void main(String[] args) {
         String firstElf;
         String secondElf;
@@ -31,7 +31,8 @@ public class d3p2 {
         outer: for (int i = 0; i < firstElf.length(); i++) {
             for (int j = 0; j < secondElf.length(); j++) {
                 for (int k = 0; k < thirdElf.length(); k++) {
-                    if (firstElf.charAt(i) == secondElf.charAt(j) && firstElf.charAt(i) == thirdElf.charAt(k)) {
+                    if (firstElf.charAt(i) == secondElf.charAt(j)
+                            && firstElf.charAt(i) == thirdElf.charAt(k)) {
                         tmp = firstElf.charAt(i);
                         break outer;
                     }

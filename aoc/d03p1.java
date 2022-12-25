@@ -3,7 +3,7 @@ package aoc;
 import java.io.FileReader;
 import java.io.BufferedReader;
 
-public class d3p1 {
+public class d03p1 {
     public static void main(String[] args) {
         String currentLine;
         int total = 0;
@@ -24,7 +24,7 @@ public class d3p1 {
 
     static String[] split(String rucksack) {
         int half = rucksack.length() / 2;
-        return new String[] { rucksack.substring(0, half), rucksack.substring(half) };
+        return new String[] {rucksack.substring(0, half), rucksack.substring(half)};
     }
 
     static char compare(String[] parts) throws Exception {

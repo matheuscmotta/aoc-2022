@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 
-public class d9p1 {
+public class d09p1 {
     public static void main(String[] args) {
         ArrayList<String> lines = new ArrayList<>(2000);
         try (BufferedReader textFile = new BufferedReader(new FileReader("aoc/input/d9.txt"))) {
@@ -31,14 +31,15 @@ public class d9p1 {
     }
 }
 
+
 class Knot {
     private int x;
     private int y;
     private Knot tail = null;
     private LinkedHashSet<String> history;
     private int[] lastDirection;
-    private final static int[] HORIZONTAL = { 1, 0 };
-    private final static int[] DIAGONAL = { 1, 1 };
+    private final static int[] HORIZONTAL = {1, 0};
+    private final static int[] DIAGONAL = {1, 1};
     private static HashMap<String, Integer> directionMap = new HashMap<>(4);
 
     {
@@ -58,7 +59,7 @@ class Knot {
     }
 
     public int[] getPoint() {
-        return new int[] { x, y };
+        return new int[] {x, y};
     }
 
     public int[] getLastDirection() {
@@ -118,6 +119,7 @@ class Knot {
     }
 }
 
+
 class Vector {
     public static int[] rotate(int[] direction, int n) {
         // This is the same method from the day 8 puzzle.
@@ -136,11 +138,12 @@ class Vector {
 
     public static double getDistance(int[] vector1, int[] vector2) {
         // Calculate the distance using the Pythagorean theorem.
-        return Math.sqrt(Math.pow(vector2[0] - vector1[0], 2) + Math.pow(vector2[1] - vector1[1], 2));
+        return Math
+                .sqrt(Math.pow(vector2[0] - vector1[0], 2) + Math.pow(vector2[1] - vector1[1], 2));
     }
 
     public static int[] getVector(int[] point1, int[] point2) {
-        return new int[] { point2[0] - point1[0], point2[1] - point1[1] };
+        return new int[] {point2[0] - point1[0], point2[1] - point1[1]};
     }
 
     public static boolean inSameQuadrant(int[] vector1, int[] vector2) {

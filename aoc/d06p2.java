@@ -4,7 +4,7 @@ import java.io.FileReader;
 import java.util.HashSet;
 import java.io.BufferedReader;
 
-public class d6p2 {
+public class d06p2 {
     public static void main(String[] args) {
         // With a bigger frame the previous remark makes even more sense, but still not
         // worth the trouble.

@@ -2,10 +2,10 @@ package aoc;
 
 import java.io.FileReader;
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.List;
 import java.io.BufferedReader;
 
-public class d5p1 {
+public class d05p2 {
     public static void main(String[] args) {
         Crates crates = new Crates();
         crates.execute();
@@ -13,8 +13,9 @@ public class d5p1 {
     }
 }
 
+
 class Crates {
-    private ArrayList<LinkedList<String>> crates;
+    private ArrayList<ArrayList<String>> crates;
     private ArrayList<ArrayList<Integer>> operations;
 
     public Crates() {
@@ -44,7 +45,7 @@ class Crates {
 
                     // Declare the linked lists when processing the first line.
                     if (line == 0)
-                        crates.add(new LinkedList<String>());
+                        crates.add(new ArrayList<>());
 
                     // Read the crate.
                     String currentCrate = currentLine.substring(column, column + 3);
@@ -100,18 +101,22 @@ class Crates {
     }
 
     public void execute() {
+        // I guess the point of part 2 is to merge "stacks" efficiently. For example,
+        // using a linked list type with the capability to edit a node reference to
+        // point to the head of another list. But not worth the effort here.
         for (ArrayList<Integer> operation : operations) {
-            for (int i = 1; i <= operation.get(0); i++) {
-                String pickCrate = crates.get(operation.get(1) - 1).removeFirst();
-                crates.get(operation.get(2) - 1).addFirst(pickCrate);
-            }
+            ArrayList<String> sourceStack = crates.get(operation.get(1) - 1);
+            ArrayList<String> destinationStack = crates.get(operation.get(2) - 1);
+            List<String> selectedCrates = sourceStack.subList(0, operation.get(0));
+            destinationStack.addAll(0, selectedCrates);
+            selectedCrates.clear();
         }
     }
 
     public String read() {
         String heads = "";
-        for (LinkedList<String> head : crates) {
-            heads += head.getFirst();
+        for (ArrayList<String> head : crates) {
+            heads += head.get(0);
         }
         return heads.replace("[", "").replace("]", "");
     }

@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 
-public class d9p2 {
+public class d09p2 {
     public static void main(String[] args) {
         ArrayList<String> lines = new ArrayList<>(2000);
         try (BufferedReader textFile = new BufferedReader(new FileReader("aoc/input/d9.txt"))) {
@@ -35,13 +35,14 @@ public class d9p2 {
     }
 }
 
+
 class Knot {
     private int x;
     private int y;
     private int size;
     private Knot knotBehind = null;
     private LinkedHashSet<String> history;
-    private final static int[] HORIZONTAL = { 1, 0 };
+    private final static int[] HORIZONTAL = {1, 0};
     private static HashMap<String, Integer> directionMap = new HashMap<>(4);
 
     {
@@ -67,7 +68,7 @@ class Knot {
     }
 
     public int[] getCoordinates() {
-        return new int[] { x, y };
+        return new int[] {x, y};
     }
 
     public void moveTo(String operation) {
@@ -123,6 +124,7 @@ class Knot {
     }
 }
 
+
 class IterableKnot extends Knot implements Iterable<Knot> {
     public IterableKnot(int x, int y, int numOfKnotsBehind) {
         super(x, y, numOfKnotsBehind);
@@ -149,6 +151,7 @@ class IterableKnot extends Knot implements Iterable<Knot> {
         }
     }
 }
+
 
 class Grid {
     private char[][] grid;
@@ -207,6 +210,7 @@ class Grid {
     }
 }
 
+
 class Vector {
     public static int[] rotate(int[] direction, int n) {
         // This is the same method from the day 8 puzzle.
@@ -220,7 +224,7 @@ class Vector {
     }
 
     public static int[] getVector(int[] point1, int[] point2) {
-        return new int[] { point2[0] - point1[0], point2[1] - point1[1] };
+        return new int[] {point2[0] - point1[0], point2[1] - point1[1]};
     }
 
     public static int[] closestWithCoordinates1Or0(int[] vector) {

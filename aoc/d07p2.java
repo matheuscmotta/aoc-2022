@@ -6,18 +6,28 @@ import java.util.LinkedList;
 import java.io.FileReader;
 import java.io.BufferedReader;
 
-public class d7p1 {
+public class d07p2 {
     public static void main(String[] args) {
         Registry registry = new Registry();
         Directory root = new Directory("/", null, registry);
         parseInput(root, registry);
-        int total = 0;
+        // Could've organized this better, but whatever.
+        int usedSpace = root.size();
+        int unnusedSpace = 70000000 - usedSpace;
+        ArrayList<Directory> candidatesForDeletion = new ArrayList<>();
         for (Directory directory : registry) {
-            if (directory.size() < 100000) {
-                total += directory.size();
+            if (directory.size() + unnusedSpace >= 30000000) {
+                candidatesForDeletion.add(directory);
             }
         }
-        System.out.println(total);
+        Directory toDelete = candidatesForDeletion.get(0);
+        for (Directory directory : candidatesForDeletion) {
+            // Good thing we have a cache mechanism for the size.
+            if (directory.size() < toDelete.size()) {
+                toDelete = directory;
+            }
+        }
+        System.out.println(toDelete.size());
     }
 
     static void parseInput(Directory root, Registry registry) {
@@ -54,7 +64,8 @@ public class d7p1 {
                 // Add directory.
                 if (currentLine.startsWith("dir")) {
                     String newDirectoryName = currentLine.substring(4, currentLine.length());
-                    currentDirectory.addDirectory(new Directory(newDirectoryName, currentDirectory, registry));
+                    currentDirectory.addDirectory(
+                            new Directory(newDirectoryName, currentDirectory, registry));
                     continue;
                 }
                 // Add file.
@@ -70,9 +81,10 @@ public class d7p1 {
     }
 }
 
+
 /**
- * This class is meant to simplify traversing the filesystem tree. Whenever a
- * directory is created, its constructor will add itself to the list.
+ * This class is meant to simplify traversing the filesystem tree. Whenever a directory is created,
+ * its constructor will add itself to the list.
  */
 class Registry implements Iterable<Directory> {
     private LinkedList<Directory> registries;
@@ -90,6 +102,7 @@ class Registry implements Iterable<Directory> {
         return registries.iterator();
     }
 }
+
 
 class Directory {
     public final String name;
@@ -138,6 +151,7 @@ class Directory {
         return sizeCache;
     }
 }
+
 
 class File {
     public final String name;
