@@ -1,5 +1,3 @@
-package aoc;
-
 import java.io.FileReader;
 import java.util.HashSet;
 import java.io.BufferedReader;
@@ -11,7 +9,7 @@ public class d06p1 {
         // scrolling one character at a time. For example, if the frame is: a[bcdd]e
         // then we could scroll it 3 characters at once: abcd[defe]g. And other
         // problems, but not worth the trouble in this case.
-        try (BufferedReader textFile = new BufferedReader(new FileReader("aoc/input/d6.txt"))) {
+        try (BufferedReader textFile = new BufferedReader(new FileReader("input/d06.txt"))) {
             String signal = textFile.readLine();
             for (int i = 0; i < signal.length() - 4; i++) {
                 String frame = signal.substring(i, i + 4);

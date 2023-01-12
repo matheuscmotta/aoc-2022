@@ -1,11 +1,8 @@
-package aoc;
-
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -14,39 +11,64 @@ import java.util.LinkedList;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-public class d11p1 {
+public class d11p2 {
     public static void main(String[] args) throws IOException, NoSuchMethodException,
             IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        // Parse the file.
-        List<String> monkeys = Files.readAllLines(Paths.get("aoc/input/d11.txt"));
+        List<String> monkeys = Files.readAllLines(Path.of("input/d11.txt"));
         HashMap<Integer, Monkey> mapOfMonkeys = Monkey.parseMonkeys(monkeys);
 
-        // Play the rounds.
-        for (int i = 1; i <= 20; i++) {
-            // A monkey plays its turns.
+        // Get the least common multiple of of each monkey test number, which in this case
+        // is just the product of each test number, since they are all prime numbers.
+        int lcmOfTests = 1;
+        for (int i = 0; i < mapOfMonkeys.size(); i++) {
+            lcmOfTests *= mapOfMonkeys.get(i).getTest();
+        }
+
+        // Rounds.
+        int rounds = 10000;
+        for (int i = 1; i <= rounds; i++) {
+            // Turns.
             for (int j = 0; j < mapOfMonkeys.size(); j++) {
                 Monkey monkey = mapOfMonkeys.get(j);
-                monkey.run(mapOfMonkeys);
+                monkey.run(mapOfMonkeys, lcmOfTests);
             }
 
-            // Print the state of the round.
-            System.out.println("\nRound " + i + ":");
-            for (int k = 0; k < mapOfMonkeys.size(); k++) {
-                Monkey monkey = mapOfMonkeys.get(k);
-                System.out.println(monkey);
+            // Print the state of the last round.
+            if (i == rounds) {
+                System.out.println("\nRound " + i + ":");
+                for (int k = 0; k < mapOfMonkeys.size(); k++) {
+                    Monkey monkey = mapOfMonkeys.get(k);
+                    System.out.println(monkey);
+                }
             }
         }
 
-        // Compute the level of monkey business and print it.
+        // Compute the level of monkey business.
         ArrayList<Integer> inspectionList = new ArrayList<>();
         for (int i = 0; i < mapOfMonkeys.size(); i++) {
             inspectionList.add(mapOfMonkeys.get(i).getInspectionCount());
         }
-        // Sort ascending and pick the last two items.
-        Collections.sort(inspectionList);
-        int businessLevel = inspectionList.get(inspectionList.size() - 1)
-                * inspectionList.get(inspectionList.size() - 2);
-        System.out.println("\nBusiness level: " + businessLevel);
+        // Get the two highest values of the list and print the data.
+        int[] maxOfInspection = maxOfList(inspectionList);
+        int max1 = maxOfInspection[0];
+        int max2 = maxOfInspection[1];
+        System.out.println("\nHighest inspection number: " + max1);
+        System.out.println("\nSecond highest inspection number: " + max2);
+        System.out.println("\nBusiness level: " + (long) max1 * max2);
+    }
+
+    public static int[] maxOfList(List<Integer> list) {
+        int max1 = 0;
+        int max2 = 0;
+        for (int i : list) {
+            if (i > max1) {
+                max2 = max1;
+                max1 = i;
+            } else if (i > max2) {
+                max2 = i;
+            }
+        }
+        return new int[] {max1, max2};
     }
 }
 
@@ -91,7 +113,7 @@ class Monkey {
         listOfItems.addLast(item);
     }
 
-    public void run(HashMap<Integer, Monkey> mapOfMonkeys)
+    public void run(HashMap<Integer, Monkey> mapOfMonkeys, int lcmOfTests)
             throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         // A monkey with no items to play with passes its turn.
         if (listOfItems.size() == 0)
@@ -100,10 +122,58 @@ class Monkey {
         // Inspect, test and then throw each item in the list.
         Iterator<Long> iterator = listOfItems.iterator();
         while (iterator.hasNext()) {
-            // Inspect: take the item, observe the new worry level, get bored of it (divide by
-            // 3), then set the new worry level.
             long oldWorry = iterator.next();
-            listOfItems.set(0, (long) Math.floor(newWorry(oldWorry) / 3));
+
+            /*
+             * To understand this problem, it helps to observe the life cycle of an item as it is
+             * being thrown by the monkeys. An item I1 is inspected and then determined to have a
+             * worry level of w1. The monkey applies his test and throws it to another monkey. The
+             * item is then inspected by its new monkey to have a worry level of w2 and thrown
+             * again. This process happens once per round.
+             * 
+             * Because the inspection operation is either a product or a sum of positive integers,
+             * the j-th worry level, wj, becomes a very large number which overflows the `long` type
+             * capacity at some round j. One solution is to use the `BigInteger` type to allow for
+             * arbitrary precision operations, but the puzzle clearly states that the point is to
+             * find another way to keep the worry levels manageable.
+             * 
+             * Notice that the worry level of an item can be replaced by another number as long as
+             * it has the same remainder when divided by the monkey test number, since the remainder
+             * is all that matters for the monkey's test. In mathematical terms, a number x1 can
+             * substitute w1 when it has the same reminder as w1 when divided by t1, where t1 is the
+             * monkey test number. In symbols: x1 ≡ w1 (mod t1).
+             * 
+             * But, when I1 is sent to the next monkey and it applies its inspection to obtain X1 =
+             * newWorry(x1), this number might not be congruent with w2. For example, if w1 = 50 and
+             * t1 = 2, then x1 = 0. The next monkey, with t2 = 3 and operation new = old + 6 would
+             * have w2 = 56 thus failing the test while with X1 = 6 the test would pass, making the
+             * monkey throw it to the wrong monkey.
+             * 
+             * To fix this issue, we need to pick x1 in a way that X1 ≡ w2 (mod t2). These numbers
+             * have been derived from x1 and w1 by the current monkey operation: X1 = x1 + c or X1 =
+             * x1 * c, for some arbritrary integer c. Let's analyze each case:
+             * 
+             * Sum: x1 + c ≡ w1 + c (mod t2) ⇔ x1 ⇔ w1 (mod t2), by the additive cancelation law of
+             * congruences.
+             * 
+             * Product: to use the multiplicative cancelation law of congruences there is the
+             * constraint to have gcd(c, t2) = 1 and this is true because every t_i is a prime
+             * number, hence we have x1 * c ≡ w1 * c (mod t2) ⇔ x1 ≡ w1 (mod t2).
+             * 
+             * Thus, choosing x1 such that x1 ≡ w1 (mod t1) and x1 ≡ w1 (mod t2) solves the problem
+             * mentioned above with X1. To satisfy such conditions we can use a property of
+             * congruences which stablishes a relationship between multiple congruences of equal
+             * operands and distinct modulus:
+             * 
+             * x_i ≡ w_i (mod t_i), i = ⇔ x_i ≡ w_i (mod lcm(t1, ..., t_n)).
+             * 
+             * Refer to Arithmetic books for proof. For instance, Abramo Hefez p.115.
+             * 
+             * Consequently, if we take x1 such that x1 ≡ w1 (mod lcm(t1, t2)), then X1 will be
+             * congruent with w2. Do that for each subsequent round to get the solution and upper
+             * bound: newWorry(oldWorry) (mod lmc(t1, ..., tn)).
+             */
+            listOfItems.set(0, newWorry(oldWorry) % lcmOfTests);
             inspectionCount += 1;
 
             // Get the updated worry level.
@@ -123,6 +193,10 @@ class Monkey {
         return inspectionCount;
     }
 
+    public int getTest() {
+        return test;
+    }
+
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
@@ -134,6 +208,7 @@ class Monkey {
                 stringBuilder.append(", ");
             }
         }
+        stringBuilder.append(" [ inspected " + inspectionCount + " items]");
         return stringBuilder.toString();
     }
 

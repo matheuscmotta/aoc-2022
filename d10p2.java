@@ -1,8 +1,6 @@
-package aoc;
-
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -10,7 +8,7 @@ import java.util.List;
 public class d10p2 {
     public static void main(String[] args) throws IOException {
         // This is more concise than the previous file reading code.
-        List<String> instructions = Files.readAllLines(Paths.get("aoc/input/d10.txt"));
+        List<String> instructions = Files.readAllLines(Path.of("input/d10.txt"));
 
         // Run the simulation.
         CPU cpu = new CPU(instructions);

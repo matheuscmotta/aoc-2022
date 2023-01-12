@@ -1,5 +1,3 @@
-package aoc;
-
 import java.io.FileReader;
 import java.io.BufferedReader;
 import java.util.ArrayList;
@@ -10,7 +8,7 @@ import java.util.LinkedHashSet;
 public class d09p2 {
     public static void main(String[] args) {
         ArrayList<String> lines = new ArrayList<>(2000);
-        try (BufferedReader textFile = new BufferedReader(new FileReader("aoc/input/d9.txt"))) {
+        try (BufferedReader textFile = new BufferedReader(new FileReader("input/d09.txt"))) {
             String currentLine;
             while (true) {
                 currentLine = textFile.readLine();

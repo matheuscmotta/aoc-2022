@@ -1,5 +1,3 @@
-package aoc;
-
 import java.io.FileReader;
 import java.io.BufferedReader;
 
@@ -8,7 +6,7 @@ public class d03p1 {
         String currentLine;
         int total = 0;
 
-        try (BufferedReader textFile = new BufferedReader(new FileReader("aoc/input/d3.txt"))) {
+        try (BufferedReader textFile = new BufferedReader(new FileReader("input/d03.txt"))) {
             while (true) {
                 currentLine = textFile.readLine();
                 if (currentLine == null)

@@ -1,5 +1,3 @@
-package aoc;
-
 import java.io.FileReader;
 import java.util.HashSet;
 import java.io.BufferedReader;
@@ -8,7 +6,7 @@ public class d06p2 {
     public static void main(String[] args) {
         // With a bigger frame the previous remark makes even more sense, but still not
         // worth the trouble.
-        try (BufferedReader textFile = new BufferedReader(new FileReader("aoc/input/d6.txt"))) {
+        try (BufferedReader textFile = new BufferedReader(new FileReader("input/d06.txt"))) {
             String signal = textFile.readLine();
             for (int i = 0; i < signal.length() - 14; i++) {
                 String frame = signal.substring(i, i + 14);

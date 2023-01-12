@@ -1,5 +1,3 @@
-package aoc;
-
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -26,7 +24,7 @@ class Crates {
 
         // Open the file once and parse it, storing the data in a custom format
         // represented by this type. Some repetition, but convenience...
-        try (BufferedReader textFile = new BufferedReader(new FileReader("aoc/input/d5.txt"))) {
+        try (BufferedReader textFile = new BufferedReader(new FileReader("input/d05.txt"))) {
             String currentLine;
 
             // Read the crates. Store it as a list of linked lists, heads being top of

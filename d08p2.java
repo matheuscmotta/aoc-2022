@@ -1,5 +1,3 @@
-package aoc;
-
 import java.io.FileReader;
 import java.io.BufferedReader;
 import java.util.ArrayList;
@@ -7,7 +5,7 @@ import java.util.ArrayList;
 public class d08p2 {
     public static void main(String[] args) {
         ArrayList<String> lines = new ArrayList<>(99);
-        try (BufferedReader textFile = new BufferedReader(new FileReader("aoc/input/d8.txt"))) {
+        try (BufferedReader textFile = new BufferedReader(new FileReader("input/d08.txt"))) {
             String currentLine;
             while (true) {
                 currentLine = textFile.readLine();

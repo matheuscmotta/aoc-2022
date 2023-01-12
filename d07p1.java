@@ -1,5 +1,3 @@
-package aoc;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -21,7 +19,7 @@ public class d07p1 {
     }
 
     static void parseInput(Directory root, Registry registry) {
-        try (BufferedReader textFile = new BufferedReader(new FileReader("aoc/input/d7.txt"))) {
+        try (BufferedReader textFile = new BufferedReader(new FileReader("input/d07.txt"))) {
             Directory currentDirectory = null;
 
             while (true) {

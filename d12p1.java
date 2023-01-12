@@ -1,20 +1,18 @@
-package aoc;
-
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-public class d12p2 {
+public class d12p1 {
     public static void main(String[] args) throws IOException {
-        List<String> lines = Files.readAllLines(Paths.get("aoc/input/d12.txt"));
+        List<String> lines = Files.readAllLines(Path.of("input/d12.txt"));
         Grid grid = new Grid(lines);
-        int minimum = grid.minimumStart();
-        System.out.println(minimum);
+        Node end = grid.find();
+        // System.out.println(grid);
+        System.out.println(end.count());
     }
 }
 
@@ -22,7 +20,6 @@ public class d12p2 {
 class Grid {
     private Node[][] grid;
     private LinkedList<Node> queue = new LinkedList<>();
-    private LinkedList<Node> startList = new LinkedList<>();
 
     public Grid(List<String> lines) {
         grid = new Node[lines.size()][lines.get(0).length()];
@@ -31,14 +28,14 @@ class Grid {
             for (int j = 0; j < getHeight(); j++) {
                 Node newNode = new Node(line.charAt(j), new int[] {i, j});
                 grid[i][j] = newNode;
-                if (newNode.getName() == 'a') {
-                    startList.add(newNode);
+                if (newNode.isStart()) {
+                    queue.add(newNode);
                 }
             }
         }
     }
 
-    private Node find() {
+    public Node find() {
         queue.getFirst().setIsExplored();
         while (!queue.isEmpty()) {
             Node currentNode = queue.removeFirst();
@@ -54,35 +51,6 @@ class Grid {
             }
         }
         throw new Error("Could not find the end node.");
-    }
-
-    public int minimumStart() {
-        int minimum = Integer.MAX_VALUE;
-        while (!startList.isEmpty()) {
-            reset();
-            Node startNode = startList.removeFirst();
-            queue.add(startNode);
-            int count = Integer.MAX_VALUE;
-            try {
-                count = find().count();
-            } catch (Error e) {
-                // Naturally E might be unreachable starting from some points.
-                System.out.println("Unreachable from " + startNode);
-            }
-            if (count < minimum) {
-                minimum = count;
-            }
-        }
-        return minimum;
-    }
-
-    private void reset() {
-        queue.clear();
-        for (int i = 0; i < getWidth(); i++) {
-            for (int j = 0; j < getHeight(); j++) {
-                grid[i][j].reset();
-            }
-        }
     }
 
     private ArrayList<Node> getNeighbors(Node node) {
@@ -127,6 +95,7 @@ class Grid {
 class Node implements Iterable<Node> {
     private char name;
     private int[] coordinates;
+    private boolean isStart = false;
     private boolean isEnd = false;
     private Node parent = null;
     private boolean isExplored = false;
@@ -135,6 +104,7 @@ class Node implements Iterable<Node> {
         switch (name) {
             case 'S':
                 this.name = 'a';
+                isStart = true;
                 break;
             case 'E':
                 this.name = 'z';
@@ -158,6 +128,10 @@ class Node implements Iterable<Node> {
         parent = node;
     }
 
+    public boolean isStart() {
+        return isStart;
+    }
+
     public boolean isEnd() {
         return isEnd;
     }
@@ -178,11 +152,6 @@ class Node implements Iterable<Node> {
             iterator.next();
         }
         return count;
-    }
-
-    public void reset() {
-        parent = null;
-        isExplored = false;
     }
 
     @Override
@@ -208,8 +177,7 @@ class Node implements Iterable<Node> {
 
     @Override
     public String toString() {
-        String coordinates = Arrays.toString(getCoordinates());
-        return Character.toString(name) + " at " + coordinates;
+        return Character.toString(name);
     }
 }
 
