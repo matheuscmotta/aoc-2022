@@ -151,14 +151,14 @@ class Packet implements Comparable<Packet> {
             // List vs list.
             if (leftChild.isList() && rightChild.isList()) {
                 int recursiveComparison = compareTrees(leftChild, rightChild);
-                if (recursiveComparison == -1 | recursiveComparison == 1) {
+                if (recursiveComparison == -1 || recursiveComparison == 1) {
                     return recursiveComparison;
                 }
             }
 
             // Item vs item.
             int valueComparison = leftChild.compareTo(rightChild);
-            if (valueComparison == -1 | valueComparison == 1) {
+            if (valueComparison == -1 || valueComparison == 1) {
                 return valueComparison;
             }
         }
